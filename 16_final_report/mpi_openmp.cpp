@@ -1,3 +1,4 @@
+#include <omp.h>
 #include <mpi.h>
 #include <cstdio>
 #include <cmath>
@@ -40,16 +41,22 @@ int main(int argc, char** argv) {
   int recv_from = (rank + 1) % size;
   int send_to = (rank - 1 + size) % size;
 
+  //parallel 
   double comp_time = 0, comm_time = 0;
   for(int irank=0; irank<size; irank++) {
     auto tic = chrono::steady_clock::now();
     offset = N/size*((rank+irank) % size);
+    # pragma omp for shared (subA, subB, subC, size, offset)
     for (int i=0; i<N/size; i++)
+      # pragma omp for shared (subA, subB, subC, size, offset)
       for (int j=0; j<N/size; j++)
+        # pragma omp for shared (subA, subB, subC, size, offset)
         for (int k=0; k<N; k++)
           subC[N*i+j+offset] += subA[N*i+k] * subB[N/size*k+j];
+
     auto toc = chrono::steady_clock::now();
     comp_time += chrono::duration<double>(toc - tic).count();
+
     MPI_Request request[2];
     MPI_Isend(&subB[0], N*N/size, MPI_FLOAT, send_to, 0, MPI_COMM_WORLD, &request[0]);
     MPI_Irecv(&recv[0], N*N/size, MPI_FLOAT, recv_from, 0, MPI_COMM_WORLD, &request[1]);
