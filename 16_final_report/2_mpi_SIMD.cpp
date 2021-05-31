@@ -58,14 +58,14 @@ int main(int argc, char **argv) {
       float Bc[kc*nc];
       for (int p=0; p<kc; p++) {
         for (int j=0; j<nc; j++) {
-          Bc[p*nc+j] = subB[(N/size)*(p+pc)+j+jc];//???
+          Bc[p*nc+j] = subB[(N/size)*(p+pc)+j+jc];
         }
       }
       for (int ic=0; ic<N/size; ic+=mc) {
         float Ac[mc*kc],Cc[mc*nc];
         for (int i=0; i<mc; i++) {
           for (int p=0; p<kc; p++) {
-            Ac[i*kc+p] = subA[(N/size)*(i+ic)+p+pc];
+            Ac[i*kc+p] = subA[(N)*(i+ic)+p+pc];
           }
           for (int j=0; j<nc; j++) {
             Cc[i*nc+j] = 0;

@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
   MPI_Comm_size(MPI_COMM_WORLD, &size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  const int N = 4096;
+  const int N = 256;
   vector<float> A(N * N);
   vector<float> B(N * N);
   vector<float> C(N * N, 0);
@@ -44,11 +44,11 @@ int main(int argc, char **argv) {
   int send_to = (rank - 1 + size) % size;  
   
   const int m = N, n = N, k = N;
-  const int kc = 512;
-  const int nc = 64;
-  const int mc = 256;
-  const int nr = 64;
-  const int mr = 32;
+  const int kc = 128;
+  const int nc = 16;
+  const int mc = 64;
+  const int nr = 16;
+  const int mr = 8;
 
   double comp_time = 0, comm_time = 0;
 
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
         float Bc[kc*nc];
         for (int p=0; p<kc; p++) {
           for (int j=0; j<nc; j++) {
-            Bc[p*nc+j] = subB[(N/size)*(p+pc)+j+jc];//???
+            Bc[p*nc+j] = subB[(N/size)*(p+pc)+j+jc];
           }
         }
         for (int ic=0; ic<N/size; ic+=mc) {

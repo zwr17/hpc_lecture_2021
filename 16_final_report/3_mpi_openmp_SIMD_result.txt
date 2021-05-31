@@ -1,0 +1,17 @@
+N    : 256
+comp : 0.001380 s
+comm : 0.002922 s
+total: 0.004302 s (7.800283 GFlops)
+error: 0.000013
+
+N    : 1024
+comp : 0.012415 s
+comm : 0.002832 s
+total: 0.015246 s (140.852367 GFlops)
+error: 0.000092
+
+N    : 2048
+comp : 0.034572 s
+comm : 0.010073 s
+total: 0.044645 s (384.810357 GFlops)
+error: 0.000249
