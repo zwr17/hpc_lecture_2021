@@ -1,3 +1,4 @@
+#include <omp.h>
 #include <mpi.h>
 #include <cstdio>
 #include <cmath>
@@ -8,6 +9,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
+  //MPI_Init
   int size, rank;
   MPI_Init(&argc, &argv);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -43,12 +45,17 @@ int main(int argc, char** argv) {
   for(int irank=0; irank<size; irank++) {
     auto tic = chrono::steady_clock::now();
     offset = N/size*((rank+irank) % size);
+    # pragma omp for shared (subA, subB, subC, size, offset)
     for (int i=0; i<N/size; i++)
+      # pragma omp for shared (subA, subB, subC, size, offset)
       for (int j=0; j<N/size; j++)
+        # pragma omp for shared (subA, subB, subC, size, offset)
         for (int k=0; k<N; k++)
           subC[N*i+j+offset] += subA[N*i+k] * subB[N/size*k+j];
+
     auto toc = chrono::steady_clock::now();
     comp_time += chrono::duration<double>(toc - tic).count();
+
     MPI_Request request[2];
     MPI_Isend(&subB[0], N*N/size, MPI_FLOAT, send_to, 0, MPI_COMM_WORLD, &request[0]);
     MPI_Irecv(&recv[0], N*N/size, MPI_FLOAT, recv_from, 0, MPI_COMM_WORLD, &request[1]);
@@ -61,6 +68,7 @@ int main(int argc, char** argv) {
   }
   MPI_Allgather(&subC[0], N*N/size, MPI_FLOAT, &C[0], N*N/size, MPI_FLOAT, MPI_COMM_WORLD);
 
+  //error check
   for (int i=0; i<N; i++)
     for (int j=0; j<N; j++)
       for (int k=0; k<N; k++)
@@ -71,6 +79,7 @@ int main(int argc, char** argv) {
     for (int j=0; j<N; j++)
       err += fabs(C[N*i+j]);
 
+  //result 
   if(rank==0) {
     double time = comp_time+comm_time;
     printf("N    : %d\n",N);
