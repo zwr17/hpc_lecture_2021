@@ -1,5 +1,5 @@
 # hpc_lecture
-
+20M38222 ZHENG Wenru
 |          | Topic                                | Sample code               |
 | -------- | ------------------------------------ | ------------------------- |
 | Class 1  | Introduction to parallel programming |                           |
