@@ -9,13 +9,12 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
-  //MPI_Init
   int size, rank;
   MPI_Init(&argc, &argv);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  const int N = 256; //change N here example.256,1024,4096
+  const int N = 256; //change N here example.256,1024,2048
   vector<float> A(N*N);
   vector<float> B(N*N);
   vector<float> C(N*N, 0);
@@ -45,13 +44,14 @@ int main(int argc, char** argv) {
   for(int irank=0; irank<size; irank++) {
     auto tic = chrono::steady_clock::now();
     offset = N/size*((rank+irank) % size);
-    # pragma omp for shared (subA, subB, subC, size, offset)
-    for (int i=0; i<N/size; i++)
-      # pragma omp for shared (subA, subB, subC, size, offset)
-      for (int j=0; j<N/size; j++)
-        # pragma omp for shared (subA, subB, subC, size, offset)
-        for (int k=0; k<N; k++)
-          subC[N*i+j+offset] += subA[N*i+k] * subB[N/size*k+j];
+# pragma omp parallel shared (subA, subB, subC, size, offset)
+{
+    # pragma omp for
+    for (int i = 0; i < N / size; i++)
+      for (int j = 0; j < N / size; j++)
+        for (int k = 0; k < N; k++)
+          subC[N * i + j + offset] += subA[N * i + k] * subB[N / size * k + j];
+}
 
     auto toc = chrono::steady_clock::now();
     comp_time += chrono::duration<double>(toc - tic).count();
@@ -68,7 +68,6 @@ int main(int argc, char** argv) {
   }
   MPI_Allgather(&subC[0], N*N/size, MPI_FLOAT, &C[0], N*N/size, MPI_FLOAT, MPI_COMM_WORLD);
 
-  //error check
   for (int i=0; i<N; i++)
     for (int j=0; j<N; j++)
       for (int k=0; k<N; k++)
@@ -79,7 +78,6 @@ int main(int argc, char** argv) {
     for (int j=0; j<N; j++)
       err += fabs(C[N*i+j]);
 
-  //result 
   if(rank==0) {
     double time = comp_time+comm_time;
     printf("N    : %d\n",N);
