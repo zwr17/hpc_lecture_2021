@@ -39,7 +39,7 @@ mpicxx 3_mpi_openmpi_SIMD.cpp -fopenmp -fopt-info-vec-optimized -march=native -O
 
 mpirun -np 4 ./a.out
 
-# sh for 4
+# sh for 4_mpi_cuda.cu
 
 module load cuda/11.2.146 openmpi gcc
 
